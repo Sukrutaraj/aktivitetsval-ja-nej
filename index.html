@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Digital samtalsmatta</title>
+
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #f7f7f7;
+    text-align: center;
+    margin: 0;
+    padding: 20px;
+  }
+
+  #questionText {
+    font-size: 24px;
+    margin-bottom: 15px;
+  }
+
+  #questionImage {
+    max-width: 280px;
+    max-height: 220px;
+    display: none;
+    margin-bottom: 15px;
+    border-radius: 15px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  }
+
+  input[type="file"] {
+    margin-bottom: 10px;
+  }
+
+  input[type="text"] {
+    font-size: 18px;
+    padding: 10px;
+    width: 280px;
+    text-align: center;
+    margin-bottom: 25px;
+  }
+
+  .choices {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin-bottom: 30px;
+  }
+
+  .choice {
+    width: 220px;
+    height: 220px;
+    border-radius: 25px;
+    border: none;
+    cursor: pointer;
+    font-size: 22px;
+    font-weight: bold;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.25);
+    transition: transform 0.15s;
+  }
+
+  .choice:hover {
+    transform: scale(1.05);
+  }
+
+  .choice img {
+    width: 110px;
+    height: 110px;
+    margin-bottom: 10px;
+  }
+
+  #jaBtn { background-color: #4CAF50; }
+  #nejBtn { background-color: #F44336; }
+
+  .actions {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 15px;
+  }
+
+  .actionBtn {
+    background-color: #2196F3;
+    color: white;
+    border: none;
+    padding: 12px 18px;
+    border-radius: 10px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+
+  .danger {
+    background-color: #f44336;
+  }
+
+  #result {
+    margin-top: 20px;
+    font-size: 22px;
+    font-weight: bold;
+  }
+</style>
+</head>
+
+<body>
+
+<h2 id="questionText"></h2>
+<img id="questionImage" alt="Frågebild">
+
+<br>
+
+<input type="file" id="imageInput" accept="image/*">
+<br>
+<input type="text" id="questionInput" placeholder="Skriv frågan här...">
+
+<div class="choices">
+  <button id="jaBtn" class="choice" onclick="choose('JA')">
+    <img src="ja.png" alt="Ja">
+    JA
+  </button>
+
+  <button id="nejBtn" class="choice" onclick="choose('NEJ')">
+    <img src="nej.png" alt="Nej">
+    NEJ
+  </button>
+</div>
+
+<div class="actions">
+  <button class="actionBtn" onclick="showResult()">Visa svar</button>
+  <button class="actionBtn" onclick="resetChoice()">Återställ val</button>
+  <button class="actionBtn danger" onclick="clearAll()">Rensa svar</button>
+</div>
+
+<div id="result"></div>
+
+<!-- Ljud -->
+<audio id="jaSound" src="ja.m4a"></audio>
+<audio id="nejSound" src="nej.m4a"></audio>
+<audio id="clickSound" src="klick.m4a"></audio>
+
+<script>
+  const questionInput = document.getElementById("questionInput");
+  const questionText = document.getElementById("questionText");
+  const imageInput = document.getElementById("imageInput");
+  const questionImage = document.getElementById("questionImage");
+  const result = document.getElementById("result");
+
+  questionInput.addEventListener("input", () => {
+    questionText.textContent = questionInput.value;
+  });
+
+  imageInput.addEventListener("change", (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = evt => {
+      questionImage.src = evt.target.result;
+      questionImage.style.display = "block";
+    };
+    reader.readAsDataURL(file);
+  });
+
+  function choose(value) {
+    localStorage.setItem("samtalsmatta_val", value);
+
+    document.getElementById("clickSound").play();
+
+    if (value === "JA") document.getElementById("jaSound").play();
+    if (value === "NEJ") document.getElementById("nejSound").play();
+  }
+
+  function showResult() {
+    const val = localStorage.getItem("samtalsmatta_val");
+    result.textContent = val ? "Val: " + val : "Inget val har gjorts ännu.";
+  }
+
+  function resetChoice() {
+    localStorage.removeItem("samtalsmatta_val");
+    result.textContent = "";
+  }
+
+  function clearAll() {
+    localStorage.clear();
+    result.textContent = "Alla sparade svar är raderade.";
+  }
+</script>
+
+</body>
+</html>
